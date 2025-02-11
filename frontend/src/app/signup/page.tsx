@@ -1,17 +1,18 @@
-// Form.tsx
-interface FormData {
-    email: string;
-    password: string;
-    name?: string;
-  }
+ // Signup.tsx
+ "use client"
+
+// interface FormData {
+//     email: string;
+//     password: string;
+//     name?: string;
+//   }
   
-  interface FormProps {
-    type: 'login' | 'signup';
-    onSubmit: (data: FormData) => void;
-  }
+//   interface FormProps {
+//     type: 'login' | 'signup';
+//     onSubmit: (data: FormData) => void;
+//   }
   
-  // Signup.tsx
-  "use client"
+ 
   
   import { useRouter } from "next/navigation"
   import Form from "../components/Form"
