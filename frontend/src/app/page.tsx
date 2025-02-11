@@ -1,9 +1,22 @@
 'use client'
 
+import Header from "./components/Header"
+import Hero from "./components/Hero"
+import Features from "./components/Features"
+import HowItWorks from "./components/HowItWorks"
+import Testimonials from "./components/Testimonials"
+
 export default function Home() {
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold">Welcome to Evynt</h1>
-    </main>
-  );
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <Header />
+      <main>
+        <Hero />
+        <Features />
+        <HowItWorks />
+        <Testimonials />
+      </main>
+    </div>
+  )
 }
+
