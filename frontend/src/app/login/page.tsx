@@ -2,7 +2,7 @@
 
 "use client"
 
-//jira test comment
+//jira test comment with smart commit
 import { useRouter } from "next/navigation"
 import Form from "../components/Form"
 import Link from "next/link"
