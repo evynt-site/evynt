@@ -19,6 +19,8 @@
   import Link from "next/link"
   import { motion } from "framer-motion"
   import { Logo } from "../components/Logo"
+  import axios from "axios";
+  import { useState } from "react";
   
   interface SignupData {
     email: string;
@@ -27,21 +29,42 @@
   }
   
   export default function Signup() {
-    const router = useRouter()
+    const router = useRouter();
+    const [error, setError] = useState<string | null>(null);
   
-    const handleSubmit = (data: SignupData) => {
-      // Type guard to ensure name is present for signup
-      if (!data.name) {
-        console.error("Name is required for signup");
-        return;
+    const handleSubmit = async (data: { name: string; email: string; password: string }) => {
+      try {
+        setError(null);
+    
+        // Get CSRF token (important for Laravel Sanctum)
+        await axios.get("http://localhost:8000/sanctum/csrf-cookie", { withCredentials: true });
+    
+        // Send signup request
+        const response = await axios.post(
+          "http://localhost:8000/api/register",
+          {
+            name: data.name,
+            email: data.email,
+            password: data.password,
+          },
+          { withCredentials: true } // Important to send cookies
+        );
+    
+        console.log("Signup Success:", response.data);
+    
+        // Store token in localStorage or state management
+        localStorage.setItem("auth_token", response.data.token);
+    
+        // Redirect user to dashboard
+        router.push("/dashboard");
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          setError(err.response?.data.message || "Signup failed");
+        } else {
+          setError("An unknown error occurred.");
+        }
       }
-  
-      // Here you would typically handle the signup logic
-      console.log("Signup data:", data)
-      // For now, we'll just redirect to the dashboard
-      router.push("/dashboard")
-    }
-  
+    };
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">

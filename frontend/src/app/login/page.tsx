@@ -1,23 +1,32 @@
 /* eslint-disable react/no-unescaped-entities */
+"use client";
 
-"use client"
-
-//jira test comment with smart commit
-import { useRouter } from "next/navigation"
-import Form from "../components/Form"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { Logo } from "../components/Logo"
+import { useRouter } from "next/navigation";
+import Form from "../components/Form";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Logo } from "../components/Logo";
+import { auth } from "@/lib/auth";
+import axios from "axios";
+import { useState } from "react";
 
 export default function Login() {
-  const router = useRouter()
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (data: { email: string; password: string }) => {
-    // Here you would typically handle the login logic
-    console.log("Login data:", data)
-    // For now, we'll just redirect to the dashboard
-    router.push("/dashboard")
-  }
+  const handleSubmit = async (data: { email: string; password: string }) => {
+    try {
+      setError(null);
+      await auth.login(data.email, data.password);
+      router.push("/dashboard");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data.message || "Login failed");
+      } else {
+        setError("An unknown error occurred.");
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -43,6 +52,7 @@ export default function Login() {
         className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
       >
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {error && <p className="text-red-500 text-center">{error}</p>}
           <Form type="login" onSubmit={handleSubmit} />
           <div className="mt-6">
             <div className="relative">
@@ -62,6 +72,5 @@ export default function Login() {
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
-
