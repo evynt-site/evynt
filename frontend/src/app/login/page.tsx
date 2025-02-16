@@ -6,7 +6,6 @@ import Form from "../components/Form";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Logo } from "../components/Logo";
-import { auth } from "@/lib/auth";
 import axios from "axios";
 import { useState } from "react";
 
