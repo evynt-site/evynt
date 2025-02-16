@@ -16,9 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // For example, if you're using Sanctum for stateful authentication:
         $middleware->group('api', [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            'throttle:api',
+            //'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
+        // $middleware->validateCsrfToken(except:[
+        //     'register/', 'login/'
+        // ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

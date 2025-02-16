@@ -27,7 +27,7 @@
     password: string;
     name: string;
   }
-  
+ 
   export default function Signup() {
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
@@ -36,9 +36,18 @@
       try {
         setError(null);
     
-        // Get CSRF token (important for Laravel Sanctum)
-        await axios.get("http://localhost:8000/sanctum/csrf-cookie", { withCredentials: true });
-    
+        const csrfResponse = await axios.get("http://localhost:8000/sanctum/csrf-cookie", { withCredentials: true });
+
+        // 1. Log the entire Set-Cookie header (for verification)
+        console.log("Full Set-Cookie Header:", csrfResponse.headers['set-cookie']);
+
+        // 2. Extract and log the XSRF-TOKEN cookie value
+        const xsrfToken = document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1]; // Directly from document.cookie
+        console.log("XSRF-TOKEN Cookie Value (Frontend):", xsrfToken);
+
+        // 3. Log what Axios is sending (check network tab too - see below)
+        console.log("Axios Config Headers:", axios.defaults.headers.common['X-XSRF-TOKEN']); // If Axios is automatically setting it
+
         // Send signup request
         const response = await axios.post(
           "http://localhost:8000/api/register",
@@ -47,7 +56,16 @@
             email: data.email,
             password: data.password,
           },
-          { withCredentials: true } // Important to send cookies
+          { 
+            headers: {
+              
+              //'X-CSRF-TOKEN': xsrfToken, 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+          },
+          withCredentials: true,
+
+          } 
         );
     
         console.log("Signup Success:", response.data);

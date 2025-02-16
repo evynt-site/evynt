@@ -15,17 +15,42 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (data: { email: string; password: string }) => {
-    try {
-      setError(null);
-      await auth.login(data.email, data.password);
-      router.push("/dashboard");
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data.message || "Login failed");
-      } else {
-        setError("An unknown error occurred.");
+      try {
+          setError(null);
+
+          await axios.get("http://localhost:8000/sanctum/csrf-cookie", { withCredentials: true });
+
+
+          const response = await axios.post(
+              "http://localhost:8000/api/login", 
+              {
+                  email: data.email,
+                  password: data.password,
+              },
+              {
+                  withCredentials: true,
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'Accept': 'application/json',
+                  },
+              }
+          );
+
+          console.log("Login Success:", response.data);
+
+          localStorage.setItem("auth_token", response.data.token); 
+
+          router.push("/dashboard");
+
+      } catch (err) {
+          if (axios.isAxiosError(err)) {
+              setError(err.response?.data.message || "Login failed");
+              console.error("Login Error Details:", err.response?.data); 
+          } else {
+              setError("An unknown error occurred.");
+              console.error("Login Error:", err); 
+          }
       }
-    }
   };
 
   return (
