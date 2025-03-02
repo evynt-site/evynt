@@ -3,11 +3,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 from dotenv import load_dotenv
+from flask_cors import CORS
+
 import os
 
 load_dotenv()
 
 app = Flask(__name__)
+
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 # Database Configuration
 # Access environment variables
