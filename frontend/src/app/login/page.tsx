@@ -1,22 +1,56 @@
 /* eslint-disable react/no-unescaped-entities */
+"use client";
 
-"use client"
-
-import { useRouter } from "next/navigation"
-import Form from "../components/Form"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { Logo } from "../components/Logo"
+import { useRouter } from "next/navigation";
+import Form from "../components/Form";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Logo } from "../components/Logo";
+import axios from "axios";
+import { useState } from "react";
 
 export default function Login() {
-  const router = useRouter()
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (data: { email: string; password: string }) => {
-    // Here you would typically handle the login logic
-    console.log("Login data:", data)
-    // For now, we'll just redirect to the dashboard
-    router.push("/dashboard")
-  }
+  const handleSubmit = async (data: { email: string; password: string }) => {
+      try {
+          setError(null);
+
+          await axios.get("http://localhost:8000/sanctum/csrf-cookie", { withCredentials: true });
+
+
+          const response = await axios.post(
+              "http://localhost:8000/api/login", 
+              {
+                  email: data.email,
+                  password: data.password,
+              },
+              {
+                  withCredentials: true,
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'Accept': 'application/json',
+                  },
+              }
+          );
+
+          console.log("Login Success:", response.data);
+
+          localStorage.setItem("auth_token", response.data.token); 
+
+          router.push("/dashboard");
+
+      } catch (err) {
+          if (axios.isAxiosError(err)) {
+              setError(err.response?.data.message || "Login failed");
+              console.error("Login Error Details:", err.response?.data); 
+          } else {
+              setError("An unknown error occurred.");
+              console.error("Login Error:", err); 
+          }
+      }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -42,6 +76,7 @@ export default function Login() {
         className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
       >
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {error && <p className="text-red-500 text-center">{error}</p>}
           <Form type="login" onSubmit={handleSubmit} />
           <div className="mt-6">
             <div className="relative">
@@ -61,6 +96,5 @@ export default function Login() {
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
-
