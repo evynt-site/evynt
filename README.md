@@ -1,66 +1,141 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Evynt - Event Booking Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Evynt is a microservices-based event booking platform that allows users to book events, manage bookings, and receive email confirmations.
 
-## About Laravel
+## Project Structure
+```
+├── app
+├── artisan
+├── booking-service  # Node.js microservice for managing event bookings
+├── bootstrap
+├── composer.json
+├── composer.lock
+├── config
+├── database
+├── email-service    # Node.js microservice for sending email confirmations
+├── event-service    # Flask microservice for managing events
+├── frontend         # Next.js frontend application
+├── node_modules
+├── package-lock.json
+├── package.json
+├── phpunit.xml
+├── postcss.config.js
+├── public
+├── README.md
+├── resources
+├── routes
+├── storage
+├── tailwind.config.js
+├── tests
+├── vendor
+└── vite.config.js
+```
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Prerequisites
+Ensure you have the following installed:
+- [Node.js](https://nodejs.org/) (v20.x recommended)
+- [Python 3](https://www.python.org/)
+- [MySQL](https://www.mysql.com/)
+- [Laravel](https://laravel.com/)
+- [Docker](https://www.docker.com/) (for RabbitMQ)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Setup Guide
+### 1. Clone the repository
+```sh
+git clone https://github.com/your-repo/evynt.git
+cd evynt
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Set up environment variables
+Create `.env` files in each microservice and configure them appropriately.
+#### **Booking Service (`booking-service/.env`)**
+```
+MYSQL_USER=danishh
+MYSQL_PASSWORD=your-password
+MYSQL_HOST=mysql-danishh.alwaysdata.net
+MYSQL_DB=danishh_evynt_events
+USER_SERVICE_URL=http://localhost:8000/api/user
+RABBITMQ_HOST=amqp://localhost
+```
 
-## Learning Laravel
+#### **Event Service (`event-service/.env`)**
+```
+FLASK_APP=app.py
+MYSQL_USER=your-user
+MYSQL_PASSWORD=your-password
+MYSQL_HOST=your-mysql-host
+MYSQL_DB=evynt_events
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+#### **Email Service (`email-service/.env`)**
+```
+SMTP_HOST=smtp.your-email-provider.com
+SMTP_PORT=587
+SMTP_USER=your-email@example.com
+SMTP_PASSWORD=your-email-password
+RABBITMQ_HOST=amqp://localhost
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 3. Start RabbitMQ (Docker)
+```sh
+docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+```
+RabbitMQ will be accessible at [http://localhost:15672](http://localhost:15672) (default login: guest/guest).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 4. Install dependencies
+```sh
+cd booking-service && npm install && cd ..
+cd email-service && npm install && cd ..
+cd frontend && npm install && cd ..
+```
 
-## Laravel Sponsors
+### 5. Start services
+```sh
+# Start Laravel User Service
+php artisan serve --host=0.0.0.0 --port=8000
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Start Flask Event Service
+cd event-service
+flask run --host=0.0.0.0 --port=5000
 
-### Premium Partners
+# Start Node.js Booking Service
+cd booking-service
+npm start
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+# Start Node.js Email Service
+cd email-service
+npm start
 
-## Contributing
+# Start Next.js Frontend
+cd frontend
+npx next start
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Usage
+1. **Register/Login**: Authenticate users using Laravel Sanctum.
+2. **Book an Event**: The frontend calls the booking service, which interacts with the event and user services.
+3. **Receive Email Confirmation**: RabbitMQ queues the email, and the email service sends a confirmation.
 
-## Code of Conduct
+## API Endpoints
+### Booking Service
+- `POST /bookings` - Create a new booking
+- `GET /bookings` - Retrieve all bookings
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Event Service
+- `GET /events` - Retrieve all events
+- `POST /events` - Create a new event
 
-## Security Vulnerabilities
+### User Service (Laravel)
+- `GET /api/user` - Fetch user data from Sanctum token
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Troubleshooting
+- **RabbitMQ Connection Issues:** Ensure RabbitMQ is running and accessible via `docker ps`.
+- **Database Errors:** Verify `.env` configuration and database credentials.
+- **Email Authentication Failed:** Check SMTP credentials and enable "less secure apps" if needed.
 
 ## License
+MIT License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+Developed with ❤️ by [Your Name]
+
