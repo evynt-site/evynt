@@ -128,6 +128,10 @@ npx next start
 ### User Service (Laravel)
 - `GET /api/user` - Fetch user data from Sanctum token
 
+### Architectural Overview
+![image](https://github.com/user-attachments/assets/fae91b15-4b08-40ef-bc1e-68c11fec94b9)
+
+
 ## Troubleshooting
 - **RabbitMQ Connection Issues:** Ensure RabbitMQ is running and accessible via `docker ps`.
 - **Database Errors:** Verify `.env` configuration and database credentials.
@@ -137,5 +141,5 @@ npx next start
 MIT License
 
 ---
-Developed with ❤️ by [Your Name]
+Developed with ❤️ by Danish
 
