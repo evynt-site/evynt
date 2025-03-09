@@ -7,21 +7,56 @@ import { X, CreditCard } from "lucide-react"
 interface PaymentSidebarProps {
   isOpen: boolean
   onClose: () => void
+  selectedEventId: number | null // Add selectedEventId prop
 }
 
-export default function PaymentSidebar({ isOpen, onClose }: PaymentSidebarProps) {
+export default function PaymentSidebar({ isOpen, onClose, selectedEventId }: PaymentSidebarProps) {
   const [cardNumber, setCardNumber] = useState("")
   const [expiryDate, setExpiryDate] = useState("")
   const [cvv, setCvv] = useState("")
   const [name, setName] = useState("")
   const [showConfirmation, setShowConfirmation] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would typically handle the payment processing
-    // For now, we'll just show the confirmation message
-    setShowConfirmation(true)
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    const token = localStorage.getItem("auth_token"); // Ensure this is set during login
+    console.log("personal access token: ${token}  " + token );
+    if (!token) {
+      alert("User not authenticated");
+      return;
+    }
+  
+    if (!selectedEventId) {
+      alert("Event ID not found");
+      return;
+    }
+  
+    try {
+      const response = await fetch("http://localhost:3001/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Attach auth token
+        },
+        body: JSON.stringify({ event_id: selectedEventId }), // Only send event_id
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to create booking");
+      }
+  
+      const data = await response.json();
+      console.log("Booking Successful:", data);
+  
+      // Show confirmation message
+      setShowConfirmation(true);
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      alert("Booking failed. Please try again.");
+    }
+  };
+  
 
   return (
     <AnimatePresence>
@@ -129,4 +164,3 @@ export default function PaymentSidebar({ isOpen, onClose }: PaymentSidebarProps)
     </AnimatePresence>
   )
 }
-

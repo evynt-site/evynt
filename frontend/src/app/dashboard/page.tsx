@@ -21,7 +21,7 @@ interface Event {
 interface EventCardProps {
   event: Event
   index: number
-  onBookNow: () => void
+  onBookNow: (eventId: number) => void
 }
 
 export default function Dashboard() {
@@ -30,6 +30,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [isPaymentSidebarOpen, setIsPaymentSidebarOpen] = useState(false)
+  const [selectedEventId, setSelectedEventId] = useState<number | null>(null)
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -47,7 +48,6 @@ export default function Dashboard() {
       } catch (err) {
         console.error('Error fetching events:', err)
         setError('Failed to load events. Please try again later.')
-        // Set some fallback events in case the API fails
         setEvents([])
       } finally {
         setLoading(false)
@@ -56,6 +56,20 @@ export default function Dashboard() {
 
     fetchEvents()
   }, [])
+
+  const handleBookNow = (eventId: number) => {
+    setSelectedEventId(eventId)
+    // Store the selected event ID in local storage
+    localStorage.setItem('selected_event_id', eventId.toString())
+    setIsPaymentSidebarOpen(true)
+  }
+
+  const handleSidebarClose = () => {
+    setIsPaymentSidebarOpen(false)
+    // We keep the selectedEventId in state and localStorage until payment is completed or cancelled
+    // If you want to clear it on sidebar close, uncomment the next line
+    // localStorage.removeItem('selected_event_id')
+  }
 
   const filteredEvents = events.filter(
     (event) =>
@@ -130,7 +144,7 @@ export default function Dashboard() {
                     key={event.id} 
                     event={event} 
                     index={index} 
-                    onBookNow={() => setIsPaymentSidebarOpen(true)} 
+                    onBookNow={handleBookNow}
                   />
                 ))
               ) : (
@@ -146,7 +160,11 @@ export default function Dashboard() {
           </AnimatePresence>
         )}
       </main>
-      <PaymentSidebar isOpen={isPaymentSidebarOpen} onClose={() => setIsPaymentSidebarOpen(false)} />
+      <PaymentSidebar 
+        isOpen={isPaymentSidebarOpen} 
+        onClose={handleSidebarClose} 
+        selectedEventId={selectedEventId} // Pass selectedEventId as a prop
+      />
     </div>
   )
 }
@@ -186,7 +204,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, index, onBookNow }) => (
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-2 px-4 rounded-md transition-colors"
-        onClick={onBookNow}
+        onClick={() => onBookNow(event.id)}
       >
         Book Now
       </motion.button>
